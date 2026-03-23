@@ -8,12 +8,20 @@ const statusLineEl = document.getElementById("statusLine");
 const answerFormEl = document.getElementById("answerForm");
 const streetInputEl = document.getElementById("streetInput");
 const badgeListEl = document.getElementById("badgeList");
+const cookieConsentEl = document.getElementById("cookieConsent");
+const cookieConsentButtonEl = document.getElementById("cookieConsentButton");
 
 const mapService = createMap("map");
+
+const COOKIE_CONSENT_KEY = "jlm_score_cookie_consent";
+const COOKIE_SCORE_KEY = "jlm_score";
+const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 
 const state = {
   loaded: false,
   foundOfficialCodes: new Set(),
+  savedScore: 0,
+  hasCookieConsent: false,
   dictionary: null,
   lastHandledNormalized: "",
   neighbourhoodByCode: new Map(),
@@ -36,8 +44,46 @@ function setStatus(message, tone = "") {
   }
 }
 
+function setCookie(name, value, maxAgeSeconds) {
+  document.cookie = `${name}=${encodeURIComponent(value)}; max-age=${maxAgeSeconds}; path=/; SameSite=Lax`;
+}
+
+function getCookie(name) {
+  const target = `${name}=`;
+  const cookies = document.cookie ? document.cookie.split(";") : [];
+  for (const rawCookie of cookies) {
+    const cookie = rawCookie.trim();
+    if (cookie.startsWith(target)) {
+      return decodeURIComponent(cookie.slice(target.length));
+    }
+  }
+  return null;
+}
+
+function saveScoreIfConsented() {
+  if (!state.hasCookieConsent) {
+    return;
+  }
+  const total = state.savedScore + state.foundOfficialCodes.size;
+  setCookie(COOKIE_SCORE_KEY, String(total), COOKIE_MAX_AGE_SECONDS);
+}
+
 function renderStats() {
-  foundValueEl.textContent = String(state.foundOfficialCodes.size);
+  foundValueEl.textContent = String(state.savedScore + state.foundOfficialCodes.size);
+}
+
+function initializeCookieConsent() {
+  const consentValue = getCookie(COOKIE_CONSENT_KEY);
+  state.hasCookieConsent = consentValue === "yes";
+
+  if (state.hasCookieConsent) {
+    const storedScore = Number.parseInt(getCookie(COOKIE_SCORE_KEY) || "0", 10);
+    state.savedScore = Number.isFinite(storedScore) && storedScore > 0 ? storedScore : 0;
+    cookieConsentEl.hidden = true;
+    return;
+  }
+
+  cookieConsentEl.hidden = false;
 }
 
 function appendNeighbourhoodBadge(name) {
@@ -115,6 +161,7 @@ async function tryResolveTypedStreet() {
   state.lastHandledNormalized = normalized;
   state.foundOfficialCodes.add(match.officialCode);
   renderStats();
+  saveScoreIfConsented();
   checkNeighbourhoodCompletion(match.officialCode);
   setStatus(`נמצא: ${match.officialName}`, "ok");
 
@@ -135,6 +182,14 @@ answerFormEl.addEventListener("submit", (event) => {
   event.preventDefault();
 });
 
+cookieConsentButtonEl.addEventListener("click", () => {
+  state.hasCookieConsent = true;
+  setCookie(COOKIE_CONSENT_KEY, "yes", COOKIE_MAX_AGE_SECONDS);
+  saveScoreIfConsented();
+  cookieConsentEl.hidden = true;
+  setStatus("שמירת ניקוד בעוגייה הופעלה.", "ok");
+});
+
 streetInputEl.addEventListener("input", () => {
   if (typingTimer) {
     clearTimeout(typingTimer);
@@ -145,5 +200,6 @@ streetInputEl.addEventListener("input", () => {
   }, 250);
 });
 
+initializeCookieConsent();
 renderStats();
 bootstrap();

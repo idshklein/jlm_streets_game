@@ -69,6 +69,40 @@ h1 {
   font-size: 1.4rem;
 }
 
+.cookie-consent {
+  margin-bottom: 0.9rem;
+  padding: 0.7rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.cookie-consent p {
+  margin: 0 0 0.55rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.cookie-consent button {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cookie-consent button:hover {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.cookie-consent[hidden] {
+  display: none;
+}
+
 .answer-form {
   display: grid;
   gap: 0.5rem;
