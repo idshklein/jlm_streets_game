@@ -1,0 +1,31 @@
+<!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
+<qgis version="3.44.8-Solothurn">
+  <identifier>https://gisviewer.jerusalem.muni.il/arcgis/rest/services/BaseLayers/MapServer/40</identifier>
+  <parentidentifier></parentidentifier>
+  <language></language>
+  <type>dataset</type>
+  <title>שכונות</title>
+  <abstract></abstract>
+  <links>
+    <link mimeType="" type="WWW:LINK" description="" size="" name="Source" url="https://gisviewer.jerusalem.muni.il/arcgis/rest/services/BaseLayers/MapServer/40" format=""/>
+  </links>
+  <dates/>
+  <fees></fees>
+  <encoding></encoding>
+  <crs>
+    <spatialrefsys nativeFormat="Wkt">
+      <wkt>PROJCRS["Israel 1993 / Israeli TM Grid",BASEGEOGCRS["Israel 1993",DATUM["Israel 1993",ELLIPSOID["GRS 1980",6378137,298.257222101,LENGTHUNIT["metre",1]]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],ID["EPSG",4141]],CONVERSION["Israeli TM",METHOD["Transverse Mercator",ID["EPSG",9807]],PARAMETER["Latitude of natural origin",31.7343936111111,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8801]],PARAMETER["Longitude of natural origin",35.2045169444444,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8802]],PARAMETER["Scale factor at natural origin",1.0000067,SCALEUNIT["unity",1],ID["EPSG",8805]],PARAMETER["False easting",219529.584,LENGTHUNIT["metre",1],ID["EPSG",8806]],PARAMETER["False northing",626907.39,LENGTHUNIT["metre",1],ID["EPSG",8807]]],CS[Cartesian,2],AXIS["(E)",east,ORDER[1],LENGTHUNIT["metre",1]],AXIS["(N)",north,ORDER[2],LENGTHUNIT["metre",1]],USAGE[SCOPE["Cadastre, engineering survey, topographic mapping (large and medium scale)."],AREA["Israel - onshore; Palestine onshore."],BBOX[29.45,34.17,33.28,35.69]],ID["EPSG",2039]]</wkt>
+      <proj4>+proj=tmerc +lat_0=31.7343936111111 +lon_0=35.2045169444444 +k=1.0000067 +x_0=219529.584 +y_0=626907.39 +ellps=GRS80 +units=m +no_defs</proj4>
+      <srsid>40</srsid>
+      <srid>2039</srid>
+      <authid>EPSG:2039</authid>
+      <description>Israel 1993 / Israeli TM Grid</description>
+      <projectionacronym>tmerc</projectionacronym>
+      <ellipsoidacronym>EPSG:7019</ellipsoidacronym>
+      <geographicflag>false</geographicflag>
+    </spatialrefsys>
+  </crs>
+  <extent>
+    <spatial crs="EPSG:2039" maxx="225217.0487060546875" dimensions="2" minx="213736.1935526549059432" miny="624126.369873046875" minz="0" maxy="643340.389892578125" maxz="0"/>
+  </extent>
+</qgis>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>משחק רחובות ירושלים</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+    <main class="app-shell">
+        <section class="panel">
+            <h1>משחק רחובות ירושלים</h1>
+            <p class="subtitle">כותבים שם רחוב בירושלים. ברגע שיש התאמה, הרחוב מזוהה אוטומטית.</p>
+
+            <div class="stats" aria-live="polite">
+                <div>
+                    <span class="label">רחובות שנמצאו</span>
+                    <span id="foundValue" class="value">0</span>
+                </div>
+            </div>
+
+            <p id="statusLine" class="status" aria-live="polite">טוען מאגר רחובות...</p>
+
+            <div id="badgeList" class="badge-list"></div>
+
+            <details class="about">
+                <summary>מקורות מידע וייחוס</summary>
+                <ul>
+                    <li>data.gov.il: מאגר רחובות עם סינונימים (רשות האוכלוסין וההגירה)</li>
+                    <li>GeoJSON מקומי: גיאומטריית רחובות ממ"ג עיריית ירושלים</li>
+                    <li>עזר: שכבת שכונות עיריית ירושלים</li>
+                    <li>מפה בסיסית: CartoDB light_nolabels</li>
+                </ul>
+            </details>
+        </section>
+
+        <section class="map-wrap">
+            <div id="map" role="application" aria-label="מפת ירושלים"></div>
+            <div class="found-list-wrap">
+                <form id="answerForm" class="answer-form" autocomplete="off">
+                    <label for="streetInput">שם רחוב</label>
+                    <input id="streetInput" name="street" type="text" placeholder="לדוגמה: יפו" required />
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script type="module" src="./src/main.js"></script>
+</body>
+
+</html>
