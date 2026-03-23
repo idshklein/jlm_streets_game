@@ -15,12 +15,16 @@ const mapService = createMap("map");
 
 const COOKIE_CONSENT_KEY = "jlm_score_cookie_consent";
 const COOKIE_SCORE_KEY = "jlm_score";
+const COOKIE_FOUND_CODES_KEY = "jlm_found_codes";
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
+const FOUND_CODES_COOKIE_MAX_LENGTH = 3600;
 
 const state = {
   loaded: false,
   foundOfficialCodes: new Set(),
   savedScore: 0,
+  hasFoundCookieData: false,
+  pendingFoundCodes: [],
   hasCookieConsent: false,
   dictionary: null,
   lastHandledNormalized: "",
@@ -64,12 +68,55 @@ function saveScoreIfConsented() {
   if (!state.hasCookieConsent) {
     return;
   }
-  const total = state.savedScore + state.foundOfficialCodes.size;
+  const total = state.hasFoundCookieData
+    ? state.foundOfficialCodes.size
+    : state.savedScore + state.foundOfficialCodes.size;
   setCookie(COOKIE_SCORE_KEY, String(total), COOKIE_MAX_AGE_SECONDS);
 }
 
+function parseFoundCodesCookie(rawValue) {
+  if (!rawValue) {
+    return [];
+  }
+
+  const tokens = rawValue.split(".").filter(Boolean);
+  const parsed = [];
+  for (const token of tokens) {
+    const code = Number.parseInt(token, 36);
+    if (Number.isFinite(code) && code > 0) {
+      parsed.push(code);
+    }
+  }
+  return parsed;
+}
+
+function encodeFoundCodes(codes) {
+  return codes.map((code) => code.toString(36)).join(".");
+}
+
+function saveFoundCodesIfConsented() {
+  if (!state.hasCookieConsent) {
+    return;
+  }
+
+  const allCodes = Array.from(state.foundOfficialCodes);
+  let encoded = encodeFoundCodes(allCodes);
+
+  // Keep cookie payload under browser limits by dropping oldest entries if needed.
+  while (encoded.length > FOUND_CODES_COOKIE_MAX_LENGTH && allCodes.length > 1) {
+    allCodes.shift();
+    encoded = encodeFoundCodes(allCodes);
+  }
+
+  setCookie(COOKIE_FOUND_CODES_KEY, encoded, COOKIE_MAX_AGE_SECONDS);
+  state.hasFoundCookieData = allCodes.length > 0;
+}
+
 function renderStats() {
-  foundValueEl.textContent = String(state.savedScore + state.foundOfficialCodes.size);
+  const total = state.hasFoundCookieData
+    ? state.foundOfficialCodes.size
+    : state.savedScore + state.foundOfficialCodes.size;
+  foundValueEl.textContent = String(total);
 }
 
 function initializeCookieConsent() {
@@ -79,6 +126,13 @@ function initializeCookieConsent() {
   if (state.hasCookieConsent) {
     const storedScore = Number.parseInt(getCookie(COOKIE_SCORE_KEY) || "0", 10);
     state.savedScore = Number.isFinite(storedScore) && storedScore > 0 ? storedScore : 0;
+    state.pendingFoundCodes = parseFoundCodesCookie(getCookie(COOKIE_FOUND_CODES_KEY));
+    state.hasFoundCookieData = state.pendingFoundCodes.length > 0;
+
+    if (state.hasFoundCookieData) {
+      state.savedScore = 0;
+    }
+
     cookieConsentEl.hidden = true;
     return;
   }
@@ -124,8 +178,25 @@ async function bootstrap() {
       state.codesByNeighbourhood.get(neigh).add(code);
     }
 
+    if (state.pendingFoundCodes.length) {
+      for (const code of state.pendingFoundCodes) {
+        if (dictionary.officialByCode.has(code)) {
+          state.foundOfficialCodes.add(code);
+        }
+      }
+      state.hasFoundCookieData = state.foundOfficialCodes.size > 0;
+      for (const code of state.foundOfficialCodes) {
+        checkNeighbourhoodCompletion(code);
+      }
+      renderStats();
+    }
+
     state.loaded = true;
-    setStatus(`המאגר נטען. ${dictionary.officialByCode.size} רחובות זמינים.`, "ok");
+    if (state.foundOfficialCodes.size > 0) {
+      setStatus(`המאגר נטען. שוחזרו ${state.foundOfficialCodes.size} רחובות מעוגייה.`, "ok");
+    } else {
+      setStatus(`המאגר נטען. ${dictionary.officialByCode.size} רחובות זמינים.`, "ok");
+    }
   } catch (error) {
     setStatus("שגיאה בטעינת מאגר הרחובות. נסו לרענן.", "warn");
     console.error(error);
@@ -160,8 +231,10 @@ async function tryResolveTypedStreet() {
 
   state.lastHandledNormalized = normalized;
   state.foundOfficialCodes.add(match.officialCode);
+  state.hasFoundCookieData = state.hasCookieConsent;
   renderStats();
   saveScoreIfConsented();
+  saveFoundCodesIfConsented();
   checkNeighbourhoodCompletion(match.officialCode);
   setStatus(`נמצא: ${match.officialName}`, "ok");
 
@@ -185,9 +258,10 @@ answerFormEl.addEventListener("submit", (event) => {
 cookieConsentButtonEl.addEventListener("click", () => {
   state.hasCookieConsent = true;
   setCookie(COOKIE_CONSENT_KEY, "yes", COOKIE_MAX_AGE_SECONDS);
+  saveFoundCodesIfConsented();
   saveScoreIfConsented();
   cookieConsentEl.hidden = true;
-  setStatus("שמירת ניקוד בעוגייה הופעלה.", "ok");
+  setStatus("שמירת התקדמות בעוגייה הופעלה.", "ok");
 });
 
 streetInputEl.addEventListener("input", () => {
