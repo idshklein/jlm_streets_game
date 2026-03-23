@@ -188,12 +188,25 @@ async function bootstrap() {
       for (const code of state.foundOfficialCodes) {
         checkNeighbourhoodCompletion(code);
       }
+
+      let restoredOnMap = 0;
+      for (const code of state.foundOfficialCodes) {
+        const officialName = dictionary.officialByCode.get(code);
+        const shown = await mapService.revealStreet(code, officialName, { fit: false });
+        if (shown) {
+          restoredOnMap += 1;
+        }
+      }
+      if (restoredOnMap > 0) {
+        mapService.fitToResults();
+      }
+
       renderStats();
     }
 
     state.loaded = true;
     if (state.foundOfficialCodes.size > 0) {
-      setStatus(`המאגר נטען. שוחזרו ${state.foundOfficialCodes.size} רחובות מעוגייה.`, "ok");
+      setStatus(`המאגר נטען. שוחזרו ${state.foundOfficialCodes.size} רחובות ומוצגים על המפה.`, "ok");
     } else {
       setStatus(`המאגר נטען. ${dictionary.officialByCode.size} רחובות זמינים.`, "ok");
     }

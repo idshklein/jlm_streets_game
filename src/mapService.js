@@ -46,7 +46,8 @@ export function createMap(targetId) {
       streetLabels.length = 0;
     },
 
-    async revealStreet(officialCode, streetName) {
+    async revealStreet(officialCode, streetName, options = {}) {
+      const shouldFit = options.fit !== false;
       const candidate = await fetchStreetGeometryFromJerusalemGis(officialCode);
       if (!candidate) {
         return false;
@@ -60,7 +61,9 @@ export function createMap(targetId) {
 
         const group = L.featureGroup(lines);
         const bounds = group.getBounds();
-        map.fitBounds(bounds, { padding: [30, 30], maxZoom: 17 });
+        if (shouldFit) {
+          map.fitBounds(bounds, { padding: [30, 30], maxZoom: 17 });
+        }
 
         if (streetName) {
           // Flatten all segments into one coordinate sequence
@@ -99,6 +102,13 @@ export function createMap(targetId) {
       }
 
       return false;
+    },
+
+    fitToResults() {
+      const bounds = resultLayer.getBounds?.();
+      if (bounds && bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [30, 30], maxZoom: 17 });
+      }
     },
   };
 }
