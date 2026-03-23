@@ -10,6 +10,10 @@ export function createMap(targetId) {
     attributionControl: true,
   }).setView(JERUSALEM_CENTER, INITIAL_ZOOM);
 
+  const ensureMapSize = () => {
+    map.invalidateSize({ pan: false, debounceMoveend: true });
+  };
+
   L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", {
     attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com/'>CARTO</a>",
     subdomains: "abcd",
@@ -19,6 +23,14 @@ export function createMap(targetId) {
   const resultLayer = L.layerGroup().addTo(map);
   const labelLayer = L.layerGroup().addTo(map);
   const streetLabels = [];
+
+  // iOS Safari sometimes paints a blank Leaflet container until a resize/invalidate occurs.
+  window.addEventListener("load", () => setTimeout(ensureMapSize, 50));
+  window.addEventListener("resize", () => setTimeout(ensureMapSize, 50));
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", () => setTimeout(ensureMapSize, 50));
+    window.visualViewport.addEventListener("scroll", () => setTimeout(ensureMapSize, 50));
+  }
 
   function updateLabelVisibility() {
     const shouldShow = map.getZoom() >= LABEL_MIN_ZOOM;

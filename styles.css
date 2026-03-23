@@ -208,7 +208,7 @@ h1 {
   .app-shell {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   .panel {
@@ -219,8 +219,12 @@ h1 {
 
   .map-wrap {
     flex: 1 1 1px;
-    min-height: 0;
+    min-height: 45dvh;
     position: relative;
+  }
+
+  #map {
+    min-height: 45dvh;
   }
 
   .found-list-wrap {
