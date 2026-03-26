@@ -26,8 +26,10 @@ jobs:
           GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
         run: |
           if [ -n "$GA_MEASUREMENT_ID" ]; then
-            sed -i "s/G-XXXXXXXXXX/$GA_MEASUREMENT_ID/g" index.html
-            echo "Injected GA measurement ID into index.html"
+            # Replace placeholder in all HTML files across root and city sub-folders
+            find . -name "index.html" -not -path "./.git/*" \
+              -exec sed -i "s/G-XXXXXXXXXX/$GA_MEASUREMENT_ID/g" {} +
+            echo "Injected GA measurement ID into all index.html files"
           else
             echo "GA_MEASUREMENT_ID secret is not set; keeping placeholder"
           fi
@@ -35,5 +37,6 @@ jobs:
       - name: Deploy to Netlify
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          # Site: isr-streets-game (3915ffd1-d4e6-4752-bed1-3881ca8af864)
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         run: netlify deploy --dir . --prod --site "$NETLIFY_SITE_ID" --auth "$NETLIFY_AUTH_TOKEN"

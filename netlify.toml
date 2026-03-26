@@ -1,0 +1,15 @@
+# Netlify configuration
+# To rename the site to isr-streets-game, go to:
+# Netlify dashboard → Site settings → General → Site details → Change site name
+# and set it to: isr-streets-game
+# This will make the site available at: https://isr-streets-game.netlify.app
+
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Referrer-Policy = "strict-origin-when-cross-origin"
